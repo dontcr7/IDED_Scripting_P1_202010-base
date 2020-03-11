@@ -1,133 +1,256 @@
-﻿namespace IDED_Scripting_P1_202010_base.Logic
+﻿using System;
+
+
+
+
+namespace IDED_Scripting_P1_202010_base.Logic
 {
     public class Unit
     {
-        //limitar rango entre (0-255)
-        #region Base 
+        private int baseAtk;
         public int BaseAtk
         {
-            get => baseAtk;
-            //protected set => baseAtk = value;
+            get { return baseAtk; }
             protected set
             {
-                if (value > 0 && value < 255) baseAtk = value;
-                else baseAtk = 0;
+                if (value >= 0 && value <= 255) baseAtk = value;
+                else if (value < 0) baseAtk = 0;
+                else if (value > 255) baseAtk = 255;
             }
-
         }
+
+        private int baseDef;
         public int BaseDef
         {
-            get => baseDef;
-            //protected set => baseDef = value; 
+            get { return baseDef; }
             protected set
             {
-                if (value > 0 && value <= 255) baseDef = value;
-                else baseDef = 0;
+                if (value >= 0 && value <= 255) baseDef = value;
+                else if (value < 0) baseDef = 0;
+                else if (value > 255) baseDef = 255;
             }
         }
+
+        private int baseSpd;
         public int BaseSpd
         {
-            get => baseSpd;
-            //protected set => baseSpd = value;
+            get { return baseSpd; }
             protected set
             {
-                if (value > 0 && value <= 255) baseSpd = value;
-                else baseSpd = 0;
+                if (value >= 0 && value <= 255) baseSpd = value;
+                else if (value < 0) baseSpd = 0;
+                else if (value > 255) baseSpd = 255;
             }
         }
-        #endregion
-        public int MoveRange
-        {
-            get => moveRange;
-            //protected set => moveRange = value; 
-            protected set
-            {
-                if (value > 0 && value <= 10) moveRange = value;
-                else moveRange = 0;
-            }
-        }
-        public int AtkRange 
-        { 
-            get => atkRange; 
-            //protected set => atkRange = value; 
-            protected set
-            {
-                if (UnitClass == EUnitClass.Ranger || UnitClass == EUnitClass.Mage)
-                {
-                    if (value > 0 && value <= 3) atkRange = value;
-                    //else atkRange = 0;
-                    else goto Retorna;
-                }
-                else if (UnitClass == EUnitClass.Dragon)
-                {
-                    if (value > 0 && value <= 5) atkRange = value;
-                    else goto Retorna;
 
-                }
-                else atkRange = 0;
-                //atkRange = value;
-                Retorna:
-                atkRange = 0;
+
+        public float moveRange;
+        public float MoveRange
+        {
+            get { return moveRange; }
+            protected set {
+                if (value >= 1 && value <= 10) moveRange = value;
+                else if (value < 1) moveRange = 1;
+                else if (value > 10) moveRange = 10;
             }
         }
+        public int AtkRange { get; protected set; }
 
         public float BaseAtkAdd { get; protected set; }
         public float BaseDefAdd { get; protected set; }
         public float BaseSpdAdd { get; protected set; }
 
-        public float Attack { get; }
-        public float Defense { get; }
-        public float Speed { get; }
+        
+        public float Attack { get; protected set; }
+        public float Defense { get; set; }
+        public float Speed { get; set; }
 
         protected Position CurrentPosition;
-        private int baseAtk;
-        private int baseDef;
-        private int baseSpd;
-        private int moveRange;
-        private int atkRange;
+        private EUnitClass unitClass;
 
-        public EUnitClass UnitClass { get; protected set; }
+        public EUnitClass UnitClass { get => unitClass; protected set => unitClass = value; }
+
+
+        Random rdn = new Random();
+        
 
         public Unit(EUnitClass _unitClass, int _atk, int _def, int _spd, int _moveRange)
         {
+            int rdnx = rdn.Next(0,100);
+            int rdny = rdn.Next(0, 100);
+
             UnitClass = _unitClass;
             BaseAtk = _atk;
             BaseDef = _def;
             BaseSpd = _spd;
             MoveRange = _moveRange;
 
-            if(UnitClass == EUnitClass.Villager)
+            CurrentPosition = new Position(rdnx, rdny);
+
+            switch (_unitClass)
             {
-                BaseAtk = 0;
-                BaseDef = 0;
-                BaseSpd = _spd;
-                MoveRange = _moveRange;
+                case EUnitClass.Villager:
+                    BaseAtkAdd = _atk * 0;
+                    BaseDefAdd = _def * 0;
+                    BaseSpdAdd = _spd * 0;
+                    AtkRange = 0;
+                    break;
+                case EUnitClass.Squire:
+                    BaseAtkAdd = _atk * 0.02f;
+                    BaseDefAdd = _def * 0.01f;
+                    BaseSpdAdd = _spd * 0;
+                    AtkRange = 1;
+                    break;
+                case EUnitClass.Soldier:
+                    BaseAtkAdd = _atk * 0.03f;
+                    BaseDefAdd = _def * 0.02f;
+                    BaseSpdAdd = _spd * 0.01f;
+                    AtkRange = 1;
+                    break;
+                case EUnitClass.Ranger:
+                    BaseAtkAdd = _atk * 0.01f;
+                    BaseDefAdd = _def * 0;
+                    BaseSpdAdd = _spd * 0.03f;
+                    AtkRange = 3;
+                    break;
+                case EUnitClass.Mage:
+                    BaseAtkAdd = _atk * 0.03f;
+                    BaseDefAdd = _def * 0.01f;
+                    BaseSpdAdd = _spd * -0.01f;
+                    AtkRange = 3;
+                    break;
+                case EUnitClass.Imp:
+                    BaseAtkAdd = _atk * 0.01f;
+                    BaseDefAdd = _def * 0;
+                    BaseSpdAdd = _spd * 0;
+                    AtkRange = 1;
+                    break;
+                case EUnitClass.Orc:
+                    BaseAtkAdd = _atk * 0.04f;
+                    BaseDefAdd = _def * 0.02f;
+                    BaseSpdAdd = _spd * -0.02f;
+                    AtkRange = 1;
+                    break;
+                case EUnitClass.Dragon:
+                    BaseAtkAdd = _atk * 0.05f;
+                    BaseDefAdd = _def * 0.03f;
+                    BaseSpdAdd = _spd * 0.02f;
+                    AtkRange = 5;
+                    break;
+                default:
+                    break;
             }
-            else
-            {
-                BaseAtk = _atk;
-                BaseDef = _def;
-                BaseSpd = _spd;
-                MoveRange = _moveRange;
-            }
+            Attack = BaseAtk + BaseAtkAdd;
+            Defense = BaseDef + BaseDefAdd;
+            Speed = BaseSpd + BaseSpdAdd;
+            if (Attack < 0) Attack = 0;
+            else if (Attack > 255) Attack = 255;
+            if (Defense < 0) Defense = 0;
+            else if (Defense > 255) Defense = 255;
+            if (Speed < 0) Speed = 0;
+            else if (Speed > 255) Speed = 255;
+            
         }
 
         public virtual bool Interact(Unit otherUnit)
         {
-            if(UnitClass == EUnitClass.Villager)
+
+            switch (UnitClass)
             {
-                goto noInter;
+                case EUnitClass.Villager:
+                    return false;
+                case EUnitClass.Squire:
+                    if(otherUnit.UnitClass is EUnitClass.Villager)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        
+                        return true;
+                    }
+                    
+                case EUnitClass.Soldier:
+                    if (otherUnit.UnitClass is EUnitClass.Villager)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+
+                        return true;
+                    }
+                case EUnitClass.Ranger:
+                    if (otherUnit.UnitClass is EUnitClass.Mage && otherUnit.UnitClass is EUnitClass.Dragon)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+
+                        return true;
+                    }
+                case EUnitClass.Mage:
+                    if (otherUnit.UnitClass is EUnitClass.Mage)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+
+                        return true;
+                    }
+                case EUnitClass.Imp:
+                    if (otherUnit.UnitClass is EUnitClass.Dragon)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+
+                        return true;
+                    }
+                case EUnitClass.Orc:
+                    if (otherUnit.UnitClass is EUnitClass.Dragon)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+
+                        return true;
+                    }
+                case EUnitClass.Dragon:
+                    return true;
+
+                default:
+                    return false;
+                
             }
-            //else if (UnitClass == EUnitClass.Squire)
             
-
-
-            noInter:
-            return false;
+            //return false;
         }
 
-        public virtual bool Interact(Prop prop) => false;
+        public virtual bool Interact(Prop prop)
+        {
+            if (UnitClass is EUnitClass.Villager) return true;
+            else return false;
+        }
 
-        public bool Move(Position targetPosition) => false;
+
+
+        
+        public bool Move(Position targetPosition)
+        {
+            float canMove = (float)Math.Sqrt(Math.Pow(targetPosition.x, 2) + Math.Pow(targetPosition.y, 2));
+
+            if (canMove <= MoveRange)
+            {
+                CurrentPosition = targetPosition;
+
+                return true;
+            }
+            else return false;
+        }
     }
 }
